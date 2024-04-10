@@ -10,7 +10,21 @@ export const AuthContext = createContext({});
 function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loadingAuth, setLoadingAuth] = useState(false);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    async function loadingUser() {
+      const storageUser = localStorage.getItem("@user");
+
+      if (storageUser) {
+        setUser(JSON.parse(storageUser));
+        setLoading(false);
+      }
+      setLoading(false);
+    }
+    loadingUser();
+  }, []);
 
   async function signIn(email, password) {
     setLoadingAuth(true);
@@ -82,6 +96,7 @@ function AuthProvider({ children }) {
         signIn,
         signUp,
         loadingAuth,
+        loading,
       }}
     >
       {children}
