@@ -1,4 +1,4 @@
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 import { useState, createContext, useEffect } from "react";
 import { auth, database } from "../services/firebaseConnection";
 import { doc, getDoc, setDoc } from "firebase/firestore";
@@ -12,10 +12,32 @@ function AuthProvider({ children }) {
   const [loadingAuth, setLoadingAuth] = useState(false);
   const navigate = useNavigate();
 
-  function signIn(email, password) {
-    console.log(email);
-    console.log(password);
-    alert("Logado");
+  async function signIn(email, password) {
+    setLoadingAuth(true);
+    await signInWithEmailAndPassword(auth, email, password)
+      .then(async (value) => {
+        let uid = value.user.uid;
+        const docRef = doc(database, "users", uid);
+        const docSnap = await getDoc(docRef);
+
+        let data = {
+          uid: uid,
+          nome: docSnap.data().name,
+          email: value.user.email,
+          avatarUrl: docSnap.data().avatarUrl,
+        };
+
+        setUser(data);
+        storageUser(data);
+        setLoadingAuth(false);
+        toast.success("Bem vindo(a) de volta!");
+        navigate("/dashboard");
+      })
+      .catch((err) => {
+        console.log("Erro" + err);
+        setLoadingAuth(false);
+        toast.error(err);
+      });
   }
 
   // Cadastra um usuário
