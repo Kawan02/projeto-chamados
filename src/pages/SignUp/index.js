@@ -30,7 +30,9 @@ export default function SignUp() {
           <input type="email" placeholder="email@email.com" value={email} onChange={(e) => setEmail(e.target.value)} />
           <input type="password" placeholder="*******" value={password} onChange={(e) => setPassword(e.target.value)} />
 
-          <button type="submit"> {loadingAuth ? "Carregando..." : "Cadastrar"}</button>
+          <button disabled={loadingAuth} type="submit">
+            {loadingAuth ? "Carregando..." : "Cadastrar"}
+          </button>
         </form>
         <Link to="/">Já possui uma conta? Faça login</Link>
       </div>
