@@ -1,4 +1,4 @@
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { useState, createContext, useEffect } from "react";
 import { auth, database } from "../services/firebaseConnection";
 import { doc, getDoc, setDoc } from "firebase/firestore";
@@ -88,6 +88,13 @@ function AuthProvider({ children }) {
   function storageUser(data) {
     localStorage.setItem("@user", JSON.stringify(data));
   }
+
+  async function logout() {
+    await signOut(auth);
+    localStorage.removeItem("@user");
+    setUser(null);
+  }
+
   return (
     <AuthContext.Provider
       value={{
@@ -95,6 +102,7 @@ function AuthProvider({ children }) {
         user,
         signIn,
         signUp,
+        logout,
         loadingAuth,
         loading,
       }}
