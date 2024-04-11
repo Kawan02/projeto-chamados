@@ -6,6 +6,9 @@ import { useContext, useState } from "react";
 import { AuthContext } from "../../contexts/auth";
 import "./profile.css";
 import { toast } from "react-toastify";
+import { doc, updateDoc } from "firebase/firestore";
+import { database, storage } from "../../services/firebaseConnection";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 export default function Profile() {
   const { user, storageUser, setUser, logout } = useContext(AuthContext);
@@ -34,6 +37,60 @@ export default function Profile() {
     }
   }
 
+  async function handleUpdate() {
+    const currentUid = user.uid;
+
+    const uploadRef = ref(storage, `images/${currentUid}/${imageAvatar.name}`);
+
+    const uploadTask = uploadBytes(uploadRef, imageAvatar).then((snapshot) => {
+      getDownloadURL(snapshot.ref).then(async (downloadUrl) => {
+        let urlFoto = downloadUrl;
+
+        const docRef = doc(database, "users", user.uid);
+
+        await updateDoc(docRef, {
+          avatarUrl: urlFoto,
+          nome: nome,
+        }).then(() => {
+          let data = {
+            ...user,
+            nome: nome,
+            avatarUrl: urlFoto,
+          };
+
+          setUser(data);
+          storageUser(data);
+          toast.success("Pefil atualizado com sucesso!");
+        });
+      });
+    });
+  }
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+
+    if (imageAvatar === null && nome !== "") {
+      // Atualizar apenas o nome do usuário
+      const docRef = doc(database, "users", user.uid);
+
+      await updateDoc(docRef, {
+        nome: nome,
+      }).then(() => {
+        let data = {
+          ...user,
+          nome: nome,
+        };
+
+        setUser(data);
+        storageUser(data);
+        toast.success("Pefil atualizado com sucesso!");
+      });
+    } else if (nome !== "" && imageAvatar !== null) {
+      // Atualizar o nome e a foto de perfil
+      handleUpdate();
+    }
+  }
+
   return (
     <div>
       <Header />
@@ -42,7 +99,7 @@ export default function Profile() {
           <FiSettings size={25} />
         </Title>
         <div className="container">
-          <form className="form-profile">
+          <form className="form-profile" onSubmit={handleSubmit}>
             <label className="label-avatar">
               <span>
                 <FiUpload color="#fff" size={25} />
