@@ -6,7 +6,11 @@ export default function Private({ children }) {
   const { signed, loading } = useContext(AuthContext);
 
   if (loading) {
-    return <div>Carregando...</div>;
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+      </div>
+    );
   }
   if (!signed) {
     return <Navigate to="/" />;
