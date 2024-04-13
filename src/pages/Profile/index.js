@@ -123,7 +123,6 @@ export default function Profile() {
           </button>
         </div>
       </div>
-      <h1>Página perfil</h1>
     </div>
   );
 }
