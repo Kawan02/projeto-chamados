@@ -5,7 +5,7 @@ import { FiPlusCircle } from "react-icons/fi";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../contexts/auth";
 import { database } from "../../services/firebaseConnection";
-import { Firestore, collection, getDoc, getDocs } from "firebase/firestore";
+import { Firestore, addDoc, collection, getDoc, getDocs } from "firebase/firestore";
 import { toast } from "react-toastify";
 
 const listRef = collection(database, "customers");
@@ -61,6 +61,28 @@ export default function New() {
     setCustomerSelected(e.target.value);
   }
 
+  async function handleRegister(e) {
+    e.preventDefault();
+
+    await addDoc(collection(database, "chamados"), {
+      created: new Date(),
+      cliente: customers[customerSelected].nomeFantasia,
+      clienteId: customers[customerSelected].id,
+      assunto: assunto,
+      complemento: complemento,
+      status: status,
+      userId: user.uid,
+    })
+      .then(() => {
+        toast.success("Chamado registrado!");
+        setComplemento("");
+        setCustomerSelected(0);
+      })
+      .catch((error) => {
+        toast.error(error.message);
+      });
+  }
+
   return (
     <div>
       <Header />
@@ -71,7 +93,7 @@ export default function New() {
         </Title>
 
         <div className="container">
-          <form className="form-profile">
+          <form className="form-profile" onSubmit={handleRegister}>
             <label>Clientes</label>
             {loadCustomer ? (
               <input type="text" disabled={true} value="Carregando..." />
