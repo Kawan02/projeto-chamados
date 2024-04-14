@@ -2,6 +2,7 @@ import { useState, useContext } from "react";
 import logo from "../../assets/logo.png";
 import { Link } from "react-router-dom";
 import { AuthContext } from "../../contexts/auth";
+import Load from "../../components/Load";
 
 export default function SignUp() {
   const [name, setName] = useState("");
@@ -31,7 +32,7 @@ export default function SignUp() {
           <input type="password" placeholder="*******" value={password} onChange={(e) => setPassword(e.target.value)} />
 
           <button disabled={loadingAuth} type="submit">
-            {loadingAuth ? "Carregando..." : "Cadastrar"}
+            {loadingAuth ? <Load /> : "Cadastrar"}
           </button>
         </form>
         <Link to="/">Já possui uma conta? Faça login</Link>
