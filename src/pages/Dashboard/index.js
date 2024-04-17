@@ -7,11 +7,12 @@ import { FiEdit2, FiMessageSquare, FiPlus, FiSearch } from "react-icons/fi";
 import { Link } from "react-router-dom";
 import { collection, getDocs, limit, orderBy, query, startAfter } from "firebase/firestore";
 import { database } from "../../services/firebaseConnection";
+import { format } from "date-fns";
+import Load from "../../components/Load";
 
 const listRef = collection(database, "chamados");
 
 export default function DashBoard() {
-  const { logout } = useContext(AuthContext);
   const [chamados, setChamados] = useState([]);
   const [load, setLoad] = useState(true);
   const [isEmpty, setIsEmpty] = useState(false);
@@ -20,9 +21,11 @@ export default function DashBoard() {
     async function loadChamados() {
       const q = query(listRef, orderBy("created", "desc"), limit(5));
       const querySnapshot = await getDocs(q);
+      setChamados([]);
       await updateState(querySnapshot);
 
       setLoad(false);
+      console.log("TESTE");
     }
     loadChamados();
 
@@ -42,6 +45,7 @@ export default function DashBoard() {
           cliente: doc.data().cliente,
           clienteId: doc.data().clienteId,
           created: doc.data().created,
+          createdFormat: format(doc.data().created.toDate(), "dd/MM/yyyy"),
           status: doc.data().status,
           complemento: doc.data().complemento,
         });
@@ -51,6 +55,10 @@ export default function DashBoard() {
       return;
     }
     setIsEmpty(true);
+  }
+
+  if (load) {
+    return <Load />;
   }
 
   return (
@@ -87,24 +95,28 @@ export default function DashBoard() {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td data-label="Cliente">Mercado esquina</td>
-                    <td data-label="Assunto">Suporte</td>
-                    <td data-label="Status">
-                      <span className="badge" style={{ backgroundColor: "#999" }}>
-                        Em Aberto
-                      </span>
-                    </td>
-                    <td data-label="Cadastrado">12/05/2022</td>
-                    <td data-label="#">
-                      <button className="action" style={{ backgroundColor: "#3583f3" }}>
-                        <FiSearch color="#fff" size={17} />
-                      </button>
-                      <button className="action" style={{ backgroundColor: "#f6a935" }}>
-                        <FiEdit2 color="#fff" size={17} />
-                      </button>
-                    </td>
-                  </tr>
+                  {chamados.map((item, index) => {
+                    return (
+                      <tr key={index}>
+                        <td data-label="Cliente">{item.cliente}</td>
+                        <td data-label="Assunto">{item.assunto}</td>
+                        <td data-label="Status">
+                          <span className="badge" style={{ backgroundColor: "#999" }}>
+                            {item.status}
+                          </span>
+                        </td>
+                        <td data-label="Cadastrado">{item.createdFormat}</td>
+                        <td data-label="#">
+                          <button className="action" style={{ backgroundColor: "#3583f3" }}>
+                            <FiSearch color="#fff" size={17} />
+                          </button>
+                          <button className="action" style={{ backgroundColor: "#f6a935" }}>
+                            <FiEdit2 color="#fff" size={17} />
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </>
