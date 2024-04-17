@@ -124,9 +124,9 @@ export default function DashBoard() {
                           <button className="action" style={{ backgroundColor: "#3583f3" }}>
                             <FiSearch color="#fff" size={17} />
                           </button>
-                          <button className="action" style={{ backgroundColor: "#f6a935" }}>
+                          <Link to={`/new/${item.id}`} className="action" style={{ backgroundColor: "#f6a935" }}>
                             <FiEdit2 color="#fff" size={17} />
-                          </button>
+                          </Link>
                         </td>
                       </tr>
                     );

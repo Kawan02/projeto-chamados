@@ -5,19 +5,22 @@ import { FiPlusCircle } from "react-icons/fi";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../contexts/auth";
 import { database } from "../../services/firebaseConnection";
-import { Firestore, addDoc, collection, getDoc, getDocs } from "firebase/firestore";
+import { Firestore, addDoc, collection, doc, getDoc, getDocs } from "firebase/firestore";
 import { toast } from "react-toastify";
+import { useParams } from "react-router-dom";
 
 const listRef = collection(database, "customers");
 
 export default function New() {
   const { user } = useContext(AuthContext);
+  const { id } = useParams();
   const [customers, setCustomers] = useState([]);
   const [loadCustomer, setLoadCustomer] = useState(true);
   const [customerSelected, setCustomerSelected] = useState(0);
   const [complemento, setComplemento] = useState("");
   const [assunto, setAssunto] = useState("Suporte");
   const [status, setStatus] = useState("Aberto");
+  const [idCustomer, setIdCustomer] = useState(false);
 
   useEffect(() => {
     async function loadCustomers() {
@@ -37,8 +40,13 @@ export default function New() {
             setLoadCustomer(false);
             return;
           }
+
           setCustomers(lista);
           setLoadCustomer(false);
+
+          if (id) {
+            loadId(lista);
+          }
         })
         .catch((error) => {
           toast.error(error.message);
@@ -47,7 +55,25 @@ export default function New() {
         });
     }
     loadCustomers();
-  }, []);
+  }, [id]);
+
+  async function loadId(lista) {
+    const docRef = doc(database, "chamados", id);
+    await getDoc(docRef)
+      .then((value) => {
+        setAssunto(value.data().assunto);
+        setStatus(value.data().status);
+        setComplemento(value.data().complemento);
+
+        let index = lista.findIndex((item) => item.id === value.data().clienteId);
+        setCustomerSelected(index);
+        setIdCustomer(true);
+      })
+      .catch((error) => {
+        console.log(error);
+        setIdCustomer(false);
+      });
+  }
 
   function handleOptionChange(e) {
     setStatus(e.target.value);
@@ -63,6 +89,11 @@ export default function New() {
 
   async function handleRegister(e) {
     e.preventDefault();
+
+    if (idCustomer) {
+      alert("Editando chamado");
+      return;
+    }
 
     await addDoc(collection(database, "chamados"), {
       created: new Date(),
