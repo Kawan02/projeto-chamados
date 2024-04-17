@@ -16,6 +16,8 @@ export default function DashBoard() {
   const [chamados, setChamados] = useState([]);
   const [load, setLoad] = useState(true);
   const [isEmpty, setIsEmpty] = useState(false);
+  const [lastDocs, setLastDocs] = useState();
+  const [loadingMore, setLoadingMore] = useState(false);
 
   useEffect(() => {
     async function loadChamados() {
@@ -51,10 +53,22 @@ export default function DashBoard() {
         });
       });
 
+      const lastDocs = querySnapshot.docs[querySnapshot.docs.length - 1]; // Pegando o ultimo item
       setChamados((chamados) => [...chamados, ...lista]);
+      setLastDocs(lastDocs);
       return;
     }
     setIsEmpty(true);
+    setLoadingMore(false);
+  }
+
+  async function handleMore() {
+    setLoadingMore(true);
+
+    const q = query(listRef, orderBy("created", "desc"), startAfter(lastDocs), limit(5));
+    const querySnapshot = await getDocs(q);
+    await updateState(querySnapshot);
+    setLoadingMore(false);
   }
 
   if (load) {
@@ -101,7 +115,7 @@ export default function DashBoard() {
                         <td data-label="Cliente">{item.cliente}</td>
                         <td data-label="Assunto">{item.assunto}</td>
                         <td data-label="Status">
-                          <span className="badge" style={{ backgroundColor: "#999" }}>
+                          <span className="badge" style={{ backgroundColor: item.status === "Aberto" ? "#5cb85c" : "#999" }}>
                             {item.status}
                           </span>
                         </td>
@@ -119,6 +133,15 @@ export default function DashBoard() {
                   })}
                 </tbody>
               </table>
+
+              {/* <h3></h3> */}
+              <br />
+              {loadingMore && <Load />}
+              {!loadingMore && !isEmpty && (
+                <button className="btn-more" onClick={handleMore}>
+                  Buscar mais
+                </button>
+              )}
             </>
           )}
         </>
