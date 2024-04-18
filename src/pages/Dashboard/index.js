@@ -9,6 +9,7 @@ import { collection, getDocs, limit, orderBy, query, startAfter } from "firebase
 import { database } from "../../services/firebaseConnection";
 import { format } from "date-fns";
 import Load from "../../components/Load";
+import Modal from "../../components/Modal";
 
 const listRef = collection(database, "chamados");
 
@@ -146,6 +147,7 @@ export default function DashBoard() {
           )}
         </>
       </div>
+      <Modal />
     </div>
   );
 }
