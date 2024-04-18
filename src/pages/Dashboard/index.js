@@ -19,6 +19,8 @@ export default function DashBoard() {
   const [isEmpty, setIsEmpty] = useState(false);
   const [lastDocs, setLastDocs] = useState();
   const [loadingMore, setLoadingMore] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [detail, setDetail] = useState();
 
   useEffect(() => {
     async function loadChamados() {
@@ -72,6 +74,11 @@ export default function DashBoard() {
     setLoadingMore(false);
   }
 
+  function toogleModal(item) {
+    setShowModal(!showModal);
+    setDetail(item);
+  }
+
   if (load) {
     return <Load />;
   }
@@ -122,7 +129,7 @@ export default function DashBoard() {
                         </td>
                         <td data-label="Cadastrado">{item.createdFormat}</td>
                         <td data-label="#">
-                          <button className="action" style={{ backgroundColor: "#3583f3" }}>
+                          <button className="action" style={{ backgroundColor: "#3583f3" }} onClick={() => toogleModal(item)}>
                             <FiSearch color="#fff" size={17} />
                           </button>
                           <Link to={`/new/${item.id}`} className="action" style={{ backgroundColor: "#f6a935" }}>
@@ -147,7 +154,7 @@ export default function DashBoard() {
           )}
         </>
       </div>
-      <Modal />
+      {showModal && <Modal conteudo={detail} close={() => setShowModal(!showModal)} />}
     </div>
   );
 }
