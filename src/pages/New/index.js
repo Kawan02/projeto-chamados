@@ -5,13 +5,14 @@ import { FiPlusCircle } from "react-icons/fi";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../contexts/auth";
 import { database } from "../../services/firebaseConnection";
-import { Firestore, addDoc, collection, doc, getDoc, getDocs } from "firebase/firestore";
+import { Firestore, addDoc, collection, doc, getDoc, getDocs, updateDoc } from "firebase/firestore";
 import { toast } from "react-toastify";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 const listRef = collection(database, "customers");
 
 export default function New() {
+  const navigate = useNavigate();
   const { user } = useContext(AuthContext);
   const { id } = useParams();
   const [customers, setCustomers] = useState([]);
@@ -91,7 +92,25 @@ export default function New() {
     e.preventDefault();
 
     if (idCustomer) {
-      alert("Editando chamado");
+      // Atualizando chamado
+      const docRef = doc(database, "chamados", id);
+      await updateDoc(docRef, {
+        cliente: customers[customerSelected].nomeFantasia,
+        clienteId: customers[customerSelected].id,
+        assunto: assunto,
+        complemento: complemento,
+        status: status,
+        userId: user.uid,
+      })
+        .then(() => {
+          toast.info("Chamado atualizado com sucesso!");
+          setCustomerSelected(0);
+          setComplemento("");
+          navigate("/dashboard");
+        })
+        .catch((error) => {
+          toast.error(error);
+        });
       return;
     }
 
@@ -119,7 +138,7 @@ export default function New() {
       <Header />
 
       <div className="content">
-        <Title nome="Novo chamado">
+        <Title nome={id ? "Editar chamado" : "Novo chamado"}>
           <FiPlusCircle size={25} />
         </Title>
 
